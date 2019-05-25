@@ -302,9 +302,31 @@ export default class MoviesDAO {
       // TODO Ticket: Get Comments
       // Implement the required pipeline.
       const pipeline = [
+        // matches all movies to queryed id from movies collection
         {
           $match: {
-            _id: ObjectId(id),
+            _id: new ObjectId(id),
+          },
+        },
+        // adds a new comments field sorted by date descending
+        {
+          $lookup: {
+            from: "comments",
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $eq: ["$movie_id", new ObjectId(id)],
+                  },
+                },
+              },
+              {
+                $sort: {
+                  date: -1,
+                },
+              },
+            ],
+            as: "comments",
           },
         },
       ]
